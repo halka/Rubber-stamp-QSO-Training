@@ -1,0 +1,16 @@
+# Exclude non-web files from the Workers Assets bundle.
+# Without this, worker.js, wrangler.toml, package.json etc. would be
+# reachable as static files (e.g. yourdomain.workers.dev/worker.js).
+worker.js
+wrangler.toml
+package.json
+package-lock.json
+bun.lock
+bun.lockb
+node_modules/
+.git/
+.gitignore
+.assetsignore
+.wrangler/
+README.md
+LICENSE
