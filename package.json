@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "preview": "wrangler versions upload"
+    "dev": "wrangler pages dev . --compatibility-date 2025-04-01",
+    "deploy": "wrangler pages deploy ."
   },
   "devDependencies": {
     "wrangler": "^3.103.2"
