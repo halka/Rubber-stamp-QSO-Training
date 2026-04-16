@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>CW QSO Trainer</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <span class="app-title">CW QSO Trainer</span>
+    <div class="header-right">
+      <span id="wpm-display" class="wpm-badge">15 WPM</span>
+      <button id="settings-btn" class="icon-btn" aria-label="Open settings" aria-controls="settings-panel" aria-expanded="false">
+        &#9881;
+      </button>
+    </div>
+  </header>
+
+  <main id="main" data-key-mode="paddle" data-mode="qso_guide">
+
+    <!-- QSO script / decoded text display -->
+    <section id="display" aria-label="QSO display">
+      <div id="step-label" class="step-label"></div>
+      <div id="script-display" class="script-display" aria-live="polite" aria-atomic="false"></div>
+      <div id="decoded-display" class="decoded-display" aria-live="polite" aria-label="Decoded text"></div>
+      <div id="hint-text" class="hint-text"></div>
+    </section>
+
+    <!-- Progress bar -->
+    <div id="progress-bar-wrap" class="progress-bar-wrap" aria-hidden="true">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+
+    <!-- CW Key area -->
+    <section id="key-area" aria-label="CW key">
+
+      <!-- Paddle layout -->
+      <div id="paddle-keys" class="paddle-keys" role="group" aria-label="Paddle keys">
+        <button id="dit-btn" class="key-btn dit-btn"
+                aria-label="Dit (dot) — also press [ key"
+                aria-pressed="false">
+          <span class="key-symbol">&#9679;</span>
+          <span class="key-label">DIT</span>
+          <span class="key-hint">[ key</span>
+        </button>
+        <button id="dah-btn" class="key-btn dah-btn"
+                aria-label="Dah (dash) — also press ] key"
+                aria-pressed="false">
+          <span class="key-symbol">&#9644;</span>
+          <span class="key-label">DAH</span>
+          <span class="key-hint">] key</span>
+        </button>
+      </div>
+
+      <!-- Straight key layout -->
+      <div id="straight-key" class="straight-key-wrap" role="group" aria-label="Straight key">
+        <button id="sk-btn" class="key-btn sk-btn"
+                aria-label="Straight key — also press Space"
+                aria-pressed="false">
+          <span class="key-symbol">&#9670;</span>
+          <span class="key-label">KEY</span>
+          <span class="key-hint">Space</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- Step navigation (QSO guide mode) -->
+    <div id="step-nav" class="step-nav">
+      <button id="prev-step-btn" class="nav-btn" aria-label="Previous step">&#9664;</button>
+      <span id="step-counter" class="step-counter"></span>
+      <button id="next-step-btn" class="nav-btn" aria-label="Next step">&#9654;</button>
+      <button id="replay-btn" class="nav-btn replay-btn" aria-label="Replay computer transmission">&#9654;&#9654;</button>
+    </div>
+
+  </main>
+
+  <!-- Mode selector (bottom nav) -->
+  <nav id="mode-bar" aria-label="Trainer mode">
+    <button class="mode-btn active" data-mode="qso_guide" aria-pressed="true">
+      <span class="mode-icon">&#128172;</span>
+      <span class="mode-label">QSO Guide</span>
+    </button>
+    <button class="mode-btn" data-mode="practice" aria-pressed="false">
+      <span class="mode-icon">&#127908;</span>
+      <span class="mode-label">Practice</span>
+    </button>
+    <button class="mode-btn" data-mode="listen" aria-pressed="false">
+      <span class="mode-icon">&#128266;</span>
+      <span class="mode-label">Listen</span>
+    </button>
+    <button class="mode-btn" data-mode="vband_assist" aria-pressed="false">
+      <span class="mode-icon">&#128225;</span>
+      <span class="mode-label">vband</span>
+    </button>
+  </nav>
+
+  <!-- Settings panel (slide-in from right) -->
+  <aside id="settings-panel" class="settings-panel" aria-label="Settings" aria-hidden="true" role="dialog">
+    <div class="settings-header">
+      <h2>Settings</h2>
+      <button id="settings-close" class="icon-btn" aria-label="Close settings">&#10005;</button>
+    </div>
+    <div class="settings-body">
+
+      <fieldset>
+        <legend>Callsigns &amp; Info</legend>
+        <label>My Callsign
+          <input type="text" id="s-mycall" maxlength="10" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        </label>
+        <label>My Name
+          <input type="text" id="s-myname" maxlength="20" autocomplete="off" spellcheck="false">
+        </label>
+        <label>My QTH (location)
+          <input type="text" id="s-myloc" maxlength="30" autocomplete="off" spellcheck="false">
+        </label>
+        <label>Partner Callsign
+          <input type="text" id="s-theircall" maxlength="10" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        </label>
+        <label>Partner Name
+          <input type="text" id="s-theirname" maxlength="20" autocomplete="off" spellcheck="false">
+        </label>
+        <label>Partner QTH
+          <input type="text" id="s-theirloc" maxlength="30" autocomplete="off" spellcheck="false">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Speed</legend>
+        <label>WPM (overall)
+          <div class="range-row">
+            <input type="range" id="s-wpm" min="5" max="40" step="1">
+            <span id="s-wpm-val" class="range-val">15</span>
+          </div>
+        </label>
+        <label>Character Speed (Farnsworth)
+          <div class="range-row">
+            <input type="range" id="s-charwpm" min="5" max="40" step="1">
+            <span id="s-charwpm-val" class="range-val">20</span>
+          </div>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Audio</legend>
+        <label>Sidetone Frequency (Hz)
+          <div class="range-row">
+            <input type="range" id="s-freq" min="400" max="900" step="10">
+            <span id="s-freq-val" class="range-val">700</span>
+          </div>
+        </label>
+        <label>Volume
+          <div class="range-row">
+            <input type="range" id="s-vol" min="0" max="100" step="5">
+            <span id="s-vol-val" class="range-val">70</span>
+          </div>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Key Mode</legend>
+        <label class="radio-label">
+          <input type="radio" name="keymode" value="paddle" id="s-mode-paddle">
+          Iambic Paddle ([ / ] keys)
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="keymode" value="straight" id="s-mode-straight">
+          Straight Key (Space key)
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>RST Report</legend>
+        <label>Default RST
+          <input type="text" id="s-rst" maxlength="5" value="599" autocomplete="off">
+        </label>
+      </fieldset>
+
+      <button id="settings-save" class="save-btn">Save &amp; Close</button>
+    </div>
+  </aside>
+
+  <!-- Overlay for settings panel -->
+  <div id="overlay" class="overlay" aria-hidden="true"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
