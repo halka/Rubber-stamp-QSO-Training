@@ -31,7 +31,6 @@ head_sampling_rate = 1    # 100 % sampling — fine for a low-traffic site
 directory           = "."
 html_handling       = "auto-trailing-slash"
 not_found_handling  = "404-page"
-binding             = "ASSETS"
 
 # ── Environments ──────────────────────────────────────────────────────────────
 # Deploy to staging:    npx wrangler deploy --env staging

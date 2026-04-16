@@ -1,0 +1,70 @@
+# ============================================================
+# Cloudflare Workers Assets — response headers
+# Evaluated per-path, top-to-bottom, all matching rules merged.
+# ============================================================
+
+# ── Immutable build artifacts ────────────────────────────────
+# JS modules and CSS are content-addressed by deploy hash.
+# Safe to cache for 1 year; a new deploy invalidates the URL.
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/style.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── Images ──────────────────────────────────────────────────
+# Icons and OGP image change only on explicit redesign.
+/icon-192.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/icon-512.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/og-image.png
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── PWA manifest ─────────────────────────────────────────────
+# Short TTL so installed apps pick up icon/name changes quickly.
+/manifest.json
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+  Content-Type: application/manifest+json; charset=utf-8
+
+# ── Root HTML ────────────────────────────────────────────────
+# Must revalidate on every navigation so users always get the
+# latest version immediately after a deploy.
+/
+  Cache-Control: no-cache, must-revalidate
+  Link: </style.css>; rel=preload; as=style, </js/app.js>; rel=modulepreload
+
+/index.html
+  Cache-Control: no-cache, must-revalidate
+  Link: </style.css>; rel=preload; as=style, </js/app.js>; rel=modulepreload
+
+# ── Security headers (site-wide) ─────────────────────────────
+/*
+  # Force HTTPS for 1 year; include subdomains; opt into preload list.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+  # Block MIME-type sniffing.
+  X-Content-Type-Options: nosniff
+
+  # Deny framing — no reason to embed this app in an iframe.
+  X-Frame-Options: DENY
+
+  # Send only the origin on cross-origin requests.
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Disable browser features the app never uses.
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+
+  # Prevent cross-origin window opener access (Spectre mitigation).
+  Cross-Origin-Opener-Policy: same-origin
+
+  # Content Security Policy
+  #   script-src 'self'          ES modules from same origin only
+  #   style-src  'unsafe-inline' JS-built HTML uses inline style attributes
+  #   media-src  'self'          Web Audio API oscillator nodes
+  #   worker-src 'self'          Future PWA service-worker scope
+  #   object-src 'none'          No plugins (Flash etc.)
+  #   upgrade-insecure-requests  Rewrite accidental http:// sub-resources
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src 'self'; font-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
