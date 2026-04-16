@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "wrangler pages dev . --compatibility-date 2025-04-01",
-    "deploy": "wrangler pages deploy ."
+    "dev":        "wrangler dev",
+    "deploy":     "wrangler deploy",
+    "staging":    "wrangler deploy --env staging",
+    "tail":       "wrangler tail",
+    "tail:stage": "wrangler tail --env staging",
+    "types":      "wrangler types"
   },
   "devDependencies": {
     "wrangler": "^3.103.2"

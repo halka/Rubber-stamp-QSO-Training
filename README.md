@@ -49,28 +49,23 @@ Fill in your callsign, name, and QTH in Settings (⚙) to personalise the script
 
 ---
 
-## Deploy on Cloudflare Pages (from the dashboard)
+## Deploy on Cloudflare Workers (from the dashboard)
 
 1. Fork or push this repository to your GitHub account.
-2. Log in to [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**.
-3. Select your repository and set:
-
-   | Setting | Value |
-   |---------|-------|
-   | Framework preset | **None** |
-   | Build command | *(leave empty)* |
-   | Build output directory | `/` |
-
+2. Log in to [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Worker** → **Connect to Git**.
+3. Select your repository. Cloudflare reads `wrangler.toml` automatically — no extra settings needed.
 4. Click **Save and Deploy**. Every push to `main` deploys automatically.
 
-The `_headers` file in the repository is picked up automatically by Cloudflare Pages and sets cache-control and security headers.
+`worker.js` handles all caching and security headers at the edge. No separate `_headers` file is needed.
 
-### Optional: local development with Wrangler CLI
+### CLI deployment
 
 ```sh
 npm install
-npm run dev        # serves at http://localhost:8788
-npm run deploy     # manual deploy via CLI
+npm run dev         # local dev server at http://localhost:8787
+npm run deploy      # deploy to production
+npm run staging     # deploy to cw-qso-trainer-staging worker
+npm run tail        # stream live request logs from production
 ```
 
 ---
@@ -92,7 +87,11 @@ python3 -m http.server 8080
 index.html          App shell and UI markup
 style.css           Mobile-first dark theme (portrait + landscape)
 manifest.json       PWA manifest
-_headers            Cloudflare Pages response headers
+icon-192.png        PWA icon (192 × 192)
+icon-512.png        PWA icon (512 × 512)
+og-image.png        Open Graph social sharing image (1200 × 630)
+worker.js           Cloudflare Worker — edge caching, CSP, HSTS, preload hints
+wrangler.toml       Workers config — Smart Placement, Assets, observability
 js/
   audio.js          Web Audio engine — sidetone + scheduled CW playback
   keyer.js          Iambic Mode B paddle + straight key state machine

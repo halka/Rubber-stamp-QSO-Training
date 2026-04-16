@@ -1,3 +1,50 @@
-name = "rubber-stamp-qso-training"
-pages_build_output_dir = "."
 compatibility_date = "2025-04-01"
+
+# ── Performance: Smart Placement ──────────────────────────────────────────────
+# Cloudflare automatically routes each request to the Worker instance in the
+# data center that minimises total latency (Worker ↔ Assets round-trip).
+[placement]
+mode = "smart"
+
+# ── Resource limits ───────────────────────────────────────────────────────────
+# This Worker only fetches an asset and mutates headers — < 2 ms CPU typical.
+# A tight limit keeps costs predictable and surfaces runaway code early.
+[limits]
+cpu_ms = 10
+
+# ── Observability ─────────────────────────────────────────────────────────────
+# Zero-config tail logging: request traces appear in the Cloudflare dashboard
+# (Workers → Logs) and can be forwarded to R2 / third-party via Tail Workers.
+[observability]
+enabled            = true
+head_sampling_rate = 1    # 100 % sampling — fine for a low-traffic site
+
+# ── Workers Assets ────────────────────────────────────────────────────────────
+# Serve the repo root as static files. The Worker intercepts every request
+# via the ASSETS binding, then injects Cache-Control and security headers.
+#
+# html_handling       = auto-trailing-slash
+#   /about  →  /about/  →  serves /about/index.html (no double-slashes)
+# not_found_handling  = 404-page
+#   Serves a proper 404 for paths with no matching asset.
+[assets]
+directory           = "."
+html_handling       = "auto-trailing-slash"
+not_found_handling  = "404-page"
+binding             = "ASSETS"
+
+# ── Environments ──────────────────────────────────────────────────────────────
+# Deploy to staging:    npx wrangler deploy --env staging
+# Deploy to production: npx wrangler deploy --env production  (or just: npx wrangler deploy)
+
+[env.staging]
+name = "cw-qso-trainer-staging"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+
+[env.production]
+name = "cw-qso-trainer"
+
+[env.production.vars]
+ENVIRONMENT = "production"
