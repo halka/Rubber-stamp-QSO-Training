@@ -1,0 +1,11 @@
+# Exclude tooling and config from the deployed asset bundle
+wrangler.toml
+package.json
+package-lock.json
+node_modules/
+.git/
+.gitignore
+README.md
+LICENSE
+.assetsignore
+.wrangler/

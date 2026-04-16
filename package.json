@@ -1,0 +1,13 @@
+{
+  "name": "cw-qso-trainer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler versions upload"
+  },
+  "devDependencies": {
+    "wrangler": "^3.103.2"
+  }
+}
