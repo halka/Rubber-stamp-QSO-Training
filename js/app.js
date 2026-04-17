@@ -21,13 +21,13 @@ const MORSE_ENC = {
   '5':'.....','6':'-....','7':'--...','8':'---..','9':'----.',
   '.':'.-.-.-', ',':'--..--', '?':'..--..', '/':'-..-.', '-':'-....-',
   // prosigns stored as multi-char keys
-  AR:'.-.-.', SK:'...-.-', KN:'-.--.', BT:'-...-',
+  AR:'.-.-.', SK:'...-.-', KN:'-.--.', BT:'-...-', AA:'.-.-',
 };
 
 // Tokenise a text string into an array of {token, pattern} objects.
 // Prosigns like AR, SK, KN, BT are treated as single tokens.
 function tokensFromText(text) {
-  const PROSIGNS = ['AR','SK','KN','BT'];
+  const PROSIGNS = ['AR','SK','KN','BT','AA'];
   const tokens = [];
   const upper = text.toUpperCase();
   let i = 0;
@@ -57,9 +57,6 @@ function renderMorseGuide(expectedText, sentText) {
   if (!guideEl) return;
 
   const tokens = tokensFromText(expectedText || '');
-  const sentLen = (sentText || '').replace(/\s+$/, '').length; // chars sent so far
-  // Map sent length to token index (count non-space tokens)
-  let nonSpaceSent = 0;
   const sentChars = (sentText || '').replace(/ /g, '').length;
 
   let nonSpaceCount = 0;
