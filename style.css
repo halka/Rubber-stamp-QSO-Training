@@ -199,6 +199,95 @@ main {
   font-style: italic;
 }
 
+/* ---- Morse pattern guide ---- */
+.morse-guide {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 6px;
+  padding: 6px 0 4px;
+  margin-top: 6px;
+  flex-shrink: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.morse-guide:empty { display: none; }
+
+/* one character group: letter label + dot/dash row */
+.mg-cg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  padding: 4px 5px 5px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+/* current (next to send) character */
+.mg-cg.mc-curr {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* already-sent characters */
+.mg-cg.mc-sent {
+  opacity: 0.35;
+}
+
+/* letter name above the pattern */
+.mg-ltr {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.mg-cg.mc-curr .mg-ltr { color: var(--accent); }
+
+/* row of dit/dah symbols */
+.mg-pat {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+}
+
+/* dit dot */
+.md {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dit-color);
+  flex-shrink: 0;
+}
+
+/* dah dash */
+.mh {
+  width: 18px;
+  height: 7px;
+  border-radius: 3px;
+  background: var(--dah-color);
+  flex-shrink: 0;
+}
+
+/* word-space visual separator */
+.mg-sp {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  flex-shrink: 0;
+  align-self: center;
+  margin: 0 2px;
+}
+
 /* ---- Progress bar ---- */
 .progress-bar-wrap {
   height: 4px;
