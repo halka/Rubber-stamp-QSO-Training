@@ -9,6 +9,89 @@ import { createDecoder }     from './decoder.js';
 import { buildScript, createTrainer, matchText } from './trainer.js';
 
 // ============================================================
+// Morse encoding table (for pattern guide display)
+// ============================================================
+const MORSE_ENC = {
+  A:'.-',   B:'-...', C:'-.-.', D:'-..', E:'.',    F:'..-.',
+  G:'--.',  H:'....', I:'..',   J:'.---',K:'-.-',  L:'.-..',
+  M:'--',   N:'-.',   O:'---',  P:'.--.', Q:'--.-', R:'.-.',
+  S:'...',  T:'-',    U:'..-',  V:'...-', W:'.--',  X:'-..-',
+  Y:'-.--', Z:'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-',
+  '5':'.....','6':'-....','7':'--...','8':'---..','9':'----.',
+  '.':'.-.-.-', ',':'--..--', '?':'..--..', '/':'-..-.', '-':'-....-',
+  // prosigns stored as multi-char keys
+  AR:'.-.-.', SK:'...-.-', KN:'-.--.', BT:'-...-',
+};
+
+// Tokenise a text string into an array of {token, pattern} objects.
+// Prosigns like AR, SK, KN, BT are treated as single tokens.
+function tokensFromText(text) {
+  const PROSIGNS = ['AR','SK','KN','BT'];
+  const tokens = [];
+  const upper = text.toUpperCase();
+  let i = 0;
+  while (i < upper.length) {
+    // Check 2-char prosign
+    const two = upper.slice(i, i + 2);
+    if (PROSIGNS.includes(two)) {
+      tokens.push({ token: two, pattern: MORSE_ENC[two] || '' });
+      i += 2;
+      continue;
+    }
+    const ch = upper[i];
+    if (ch === ' ') {
+      tokens.push({ token: ' ', pattern: null }); // word gap
+    } else {
+      tokens.push({ token: ch, pattern: MORSE_ENC[ch] || null });
+    }
+    i++;
+  }
+  return tokens;
+}
+
+// Build the Morse guide DOM inside #morse-guide.
+// sentText is the user's decoded text so far (used to mark sent chars).
+function renderMorseGuide(expectedText, sentText) {
+  const guideEl = document.getElementById('morse-guide');
+  if (!guideEl) return;
+
+  const tokens = tokensFromText(expectedText || '');
+  const sentLen = (sentText || '').replace(/\s+$/, '').length; // chars sent so far
+  // Map sent length to token index (count non-space tokens)
+  let nonSpaceSent = 0;
+  const sentChars = (sentText || '').replace(/ /g, '').length;
+
+  let nonSpaceCount = 0;
+  const html = tokens.map(({ token, pattern }) => {
+    if (token === ' ') {
+      return '<span class="mg-sp"></span>';
+    }
+    if (!pattern) return ''; // unknown char — skip
+    const isSent    = nonSpaceCount < sentChars;
+    const isCurrent = nonSpaceCount === sentChars;
+    nonSpaceCount++;
+
+    const cls = isSent ? 'mg-cg mc-sent' : isCurrent ? 'mg-cg mc-curr' : 'mg-cg';
+    const dots = pattern.split('').map(c =>
+      c === '.' ? '<span class="md"></span>' : '<span class="mh"></span>'
+    ).join('');
+    return `<span class="${cls}"><span class="mg-ltr">${token}</span><span class="mg-pat">${dots}</span></span>`;
+  }).join('');
+
+  guideEl.innerHTML = html;
+
+  // Scroll current character into view
+  const curr = guideEl.querySelector('.mc-curr');
+  if (curr) curr.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function clearMorseGuide() {
+  const guideEl = document.getElementById('morse-guide');
+  if (guideEl) guideEl.innerHTML = '';
+}
+
+// ============================================================
 // Default settings
 // ============================================================
 const DEFAULTS = {
@@ -115,6 +198,7 @@ function applyMode(mode) {
   decoder.reset();
   practiceText = '';
   decodedDisplay.textContent = '';
+  clearMorseGuide();
 
   switch (mode) {
     case 'qso_guide':
@@ -149,6 +233,7 @@ function onStepChange(step, idx, total, sentText) {
     stepCounter.textContent = total + '/' + total;
     progressBar.style.width = '100%';
     decodedDisplay.textContent = '';
+    clearMorseGuide();
     return;
   }
 
@@ -161,10 +246,12 @@ function onStepChange(step, idx, total, sentText) {
     scriptDisplay.innerHTML = '<em style="color:var(--accent)">' + escHtml(step.text) + '</em>';
     decodedDisplay.textContent = '(listening…)';
     replayBtn.style.visibility = 'visible';
+    clearMorseGuide();
   } else {
     renderMatchDisplay(sentText || '', step.text);
     decodedDisplay.textContent = sentText ? escHtml(sentText) : '';
     replayBtn.style.visibility = 'hidden';
+    renderMorseGuide(step.text, sentText || '');
   }
 }
 
