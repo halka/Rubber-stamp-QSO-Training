@@ -77,27 +77,37 @@ export function createAudioEngine(freq = 700, wpm = 15, charWpm = 20, volume = 0
   function ditMs(w) { return 1200 / w; }
 
   function ensureContext() {
-    if (ctx) {
-      if (ctx.state === 'suspended') ctx.resume();
-      return;
-    }
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    masterGain = ctx.createGain();
-    masterGain.gain.setValueAtTime(_vol, ctx.currentTime);
-    masterGain.connect(ctx.destination);
+    if (!ctx) {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = ctx.createGain();
+      masterGain.gain.setValueAtTime(_vol, ctx.currentTime);
+      masterGain.connect(ctx.destination);
 
-    oscillator = ctx.createOscillator();
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(_freq, ctx.currentTime);
-    gainNode = ctx.createGain();
-    gainNode.gain.setValueAtTime(0, ctx.currentTime);
-    oscillator.connect(gainNode);
-    gainNode.connect(masterGain);
-    oscillator.start();
+      oscillator = ctx.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(_freq, ctx.currentTime);
+      gainNode = ctx.createGain();
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      oscillator.connect(gainNode);
+      gainNode.connect(masterGain);
+      oscillator.start();
+
+      // iOS Safari requires a silent buffer to be played during the user gesture
+      // to fully unlock the AudioContext for subsequent programmatic playback.
+      const silentBuf = ctx.createBuffer(1, 1, ctx.sampleRate);
+      const silentSrc = ctx.createBufferSource();
+      silentSrc.buffer = silentBuf;
+      silentSrc.connect(ctx.destination);
+      silentSrc.start(0);
+    }
+    // Resume for any non-running state (suspended, interrupted on iOS).
+    if (ctx.state !== 'running') ctx.resume();
   }
 
   function keyDown() {
     ensureContext();
+    // Belt-and-suspenders resume: some mobile browsers re-suspend on tab switch.
+    if (ctx.state !== 'running') { ctx.resume(); }
     const t = ctx.currentTime;
     gainNode.gain.cancelScheduledValues(t);
     gainNode.gain.setValueAtTime(gainNode.gain.value, t);
@@ -196,7 +206,7 @@ export function createAudioEngine(freq = 700, wpm = 15, charWpm = 20, volume = 0
   }
 
   function resume() {
-    if (ctx && ctx.state === 'suspended') ctx.resume();
+    if (ctx && ctx.state !== 'running') ctx.resume();
   }
 
   function getDitMs() { return ditMs(_charWpm); }
