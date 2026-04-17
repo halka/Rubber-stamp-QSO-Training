@@ -1,4 +1,4 @@
-compatibility_date = "2025-04-01"
+name = "cw-qso-trainer-staging"compatibility_date = "2025-04-01"
 
 # ── Performance: Smart Placement ──────────────────────────────────────────────
 # Cloudflare automatically routes each request to the Worker instance in the
