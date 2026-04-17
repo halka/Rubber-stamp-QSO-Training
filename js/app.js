@@ -163,8 +163,8 @@ function init() {
   audio   = createAudioEngine(settings.freq, settings.wpm, settings.charWpm, settings.volume);
   decoder = createDecoder(settings.wpm, settings.charWpm, onDecodedChar, onDecodedWord);
   keyer   = createKeyer(audio, el => {
-    decoder.pushElement(el.type);
     audio.resume();
+    decoder.pushElement(el.type);
   });
   keyer.setMode(settings.keyMode);
   keyer.setWpm(settings.wpm, settings.charWpm);
